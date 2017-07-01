@@ -26,3 +26,24 @@ class Solution(object):
         :type s: str
         :rtype: List[int]
         """
+        n = len(s) + 1
+        res = range(1, n+1)
+        
+        start = end = -1
+        for i, v in enumerate(s):
+            if v == 'D':
+                if start == -1:
+                    start = i
+                    end = i+1
+                else:
+                    end += 1
+            elif v == 'I':
+                if start != -1:
+                    res[start:end+1]= res[start:end+1][::-1]
+                    start = end = -1
+                    
+        if start != -1:
+            res[start:end+1]= res[start:end+1][::-1]
+        
+        return res
+                

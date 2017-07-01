@@ -47,6 +47,8 @@ The given maze does not contain border (like the red rectangle in the example pi
 The maze contains at least 2 empty spaces, and both the width and height of the maze won't exceed 100.
 """
 
+import sys
+
 class Solution(object):
     def shortestDistance(self, maze, start, destination):
         """
@@ -55,3 +57,64 @@ class Solution(object):
         :type destination: List[int]
         :rtype: int
         """
+        row = len(maze)
+        if row == 0:
+            return False
+        col = len(maze[0])
+        
+        # -3 : not reachable, -2 : visited, -1 : default, >=0 distances
+        dist = [[-1] * col for _ in range(row)]
+        dist[start[0]][start[1]] = -2
+        self.dfs(maze, start, destination, dist)
+        return dist[start[0]][start[1]]
+        
+    def dfs(self, maze, start, destination, dist):
+        print start, dist
+        
+        res = sys.maxsize
+        exist = False
+        for dire in range(4):
+            ret = self.move(maze, start, dire)
+            dest = ret[0]
+            steps = ret[1]
+            if dest == destination:
+                dist[start[0]][start[1]] = steps
+                return
+            if dest == start or dist[dest[0]][dest[1]] == -2:
+                continue
+            if dist[dest[0]][dest[1]] == -1:
+                dist[dest[0]][dest[1]] == -2
+                self.dfs(maze, dest, destination, dist)
+            if dist[dest[0]][dest[1]] >= 0:
+                exist = True
+                res = min(res, steps + dist[dest[0]][dest[1]])
+                
+        if exist:
+            dist[start[0]][start[1]] = res
+        else:
+            dist[start[0]][start[1]] = -3
+        
+        
+    # 0 up 1 down 2 left 3 right        
+    def move(self, maze, start, direction):
+        dires = [[-1,0],[1,0],[0,-1],[0,1]]
+        
+        #pass by reference
+        cur = []
+        cur.append(start[0])
+        cur.append(start[1])
+        steps = -1
+        
+        while (0 <= cur[0] < len(maze)) and (0<= cur[1] < len(maze[0])) and maze[cur[0]][cur[1]] != 1:
+            cur[0] += dires[direction][0]
+            cur[1] += dires[direction][1]
+            steps += 1
+            
+        return [[cur[0] - dires[direction][0], cur[1] - dires[direction][1]], steps]
+
+
+sol = Solution()
+maze = [[0,0,1,0,0],[0,0,0,0,0],[0,0,0,1,0],[1,1,0,1,1],[0,0,0,0,0]]
+start = [0,4]
+destination = [4,4]
+print sol.shortestDistance(maze, start, destination)

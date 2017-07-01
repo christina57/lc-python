@@ -44,6 +44,10 @@ There is only one ball and one destination in the maze.
 Both the ball and the destination exist on an empty space, and they will not be at the same position initially.
 The given maze does not contain border (like the red rectangle in the example pictures), but you could assume the border of the maze are all walls.
 The maze contains at least 2 empty spaces, and both the width and height of the maze won't exceed 100.
+
+[[0,0,1,0,0],[0,0,0,0,0],[0,0,0,1,0],[1,1,0,1,1],[0,0,0,0,0]]
+[0,4]
+[4,4]
 """
 class Solution(object):
     def hasPath(self, maze, start, destination):
@@ -85,9 +89,10 @@ class Solution(object):
     def dfs(self, maze, start, destination, used):
         for dire in range(4):
             dest = self.move(maze, start, dire)
+            #print str(dire), dest
             if dest == destination:
                 return True
-            if dest != [-1,-1] and not used[dest[0]][dest[1]]:
+            if not used[dest[0]][dest[1]]:
                 used[dest[0]][dest[1]] = True
                 if self.dfs(maze, dest, destination, used):
                     return True
@@ -97,15 +102,13 @@ class Solution(object):
     def move(self, maze, start, direction):
         dires = [[-1,0],[1,0],[0,-1],[0,1]]
         
-        cur = start
-        movable = False
-        while 0 <= cur[0] < len(maze) and 0<= cur[1] < len(maze[0]) and maze[cur[0]][cur[1]] != 1:
+        #pass by reference
+        cur = []
+        cur.append(start[0])
+        cur.append(start[1])
+        while (0 <= cur[0] < len(maze)) and (0<= cur[1] < len(maze[0])) and maze[cur[0]][cur[1]] != 1:
             cur[0] += dires[direction][0]
             cur[1] += dires[direction][1]
-            movable = True
-        
-        if movable:
-            return [cur[0] - dires[direction][0], cur[1] - dires[direction][1]]
-        else:
-            return [-1,-1]
+            
+        return [cur[0] - dires[direction][0], cur[1] - dires[direction][1]]
         
