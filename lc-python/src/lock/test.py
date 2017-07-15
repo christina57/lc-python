@@ -1,39 +1,62 @@
-def numberOfPatterns(m, n):
-    """
-    :type m: int
-    :type n: int
-    :rtype: int
-    """
+import sys
 
-    #[[0] * 10] * 10  #
-    jump = [[0 for j in range(10)] for i in range(10)]
-    jump[1][3] = jump[3][1] = 2
-    jump[1][7] = jump[7][1] = 4
-    jump[3][9] = jump[9][3] = 6
-    jump[7][9] = jump[9][7] = 8
-    jump[2][8] = jump[8][2] = jump[4][6] = jump[6][4] = jump[1][9] = jump[9][1] = jump[3][7] = jump[7][3] = 5
-    used = [False] * 10
-    res = 0
-    for k in range(m, n + 1):
-        res += dfs(1, k - 1, jump, used) * 4
-        res += dfs(2, k - 1, jump, used) * 4
-        res += dfs(5, k - 1, jump, used)
-
-    return res
+import collections
 
 
-def dfs(start, remain, jump, used):
-    if remain == 0:
-        return 1
+class Solution(object):
+    def findShortestWay(self, maze, ball, hole):
+        """
+        :type maze: List[List[int]]
+        :type ball: List[int]
+        :type hole: List[int]
+        :rtype: str
+        """
+        row = len(maze)
+        if row == 0:
+            return False
+        col = len(maze[0])
 
-    used[start] = True
-    res = 0
+        Q = collections.deque()
+        Q.append(ball)
 
-    for i in range(1, 10):
-        if (not used[i]) and (jump[start][i] == 0 or used[jump[start][i]]):
-            res += dfs(i, remain - 1, jump, used)
+        dire = ((1, 0), (0, -1), (0, 1), (-1, 0))
+        diresym = ('d', 'l', 'r', 'u')
+        distpath = [[[sys.maxsize, []] for _ in range(col)] for _ in range(row)]
+        distpath[ball[0]][ball[1]][0] = 0
+        mindist = sys.maxsize
+        path = []
 
-    used[start] = False
-    return res
+        while Q:
+            cur = Q.popleft()
+            for i, d in enumerate(dire):
+                steps = 0
+                next = [cur[0], cur[1]]
+                while (0 <= next[0] < len(maze)) and (0 <= next[1] < len(maze[0])) and maze[next[0]][next[1]] != 1:
+                    if next == hole:
+                        if (distpath[cur[0]][cur[1]][0] + steps) < mindist or ((distpath[cur[0]][cur[1]][0] + steps) == mindist and distpath[cur[0]][cur[1]][1]+[diresym[i]] < path):
+                            mindist = (distpath[cur[0]][cur[1]][0] + steps)
+                            path = distpath[cur[0]][cur[1]][1]+[diresym[i]]
 
-print numberOfPatterns(2,2)
+                    next[0] += d[0]
+                    next[1] += d[1]
+                    steps += 1
+                steps -= 1
+                end = (next[0] - d[0], next[1] - d[1])
+
+                if (distpath[cur[0]][cur[1]][0] + steps) < distpath[end[0]][end[1]][0] or ((distpath[cur[0]][cur[1]][0] + steps) == distpath[end[0]][end[1]][0] and distpath[cur[0]][cur[1]][1]+[diresym[i]] < distpath[end[0]][end[1]][1]):
+                    distpath[end[0]][end[1]][0] = distpath[cur[0]][cur[1]][0] + steps
+                    distpath[end[0]][end[1]][1] = distpath[cur[0]][cur[1]][1]+[diresym[i]]
+                    Q.append(end)
+
+        if mindist < sys.maxsize:
+            return "".join(path)
+        else:
+            return "impossible"
+
+
+
+sol = Solution()
+maze = [[0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0],[0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0],[1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0],[0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0],[0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0],[1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0],[0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0],[0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1],[0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0],[1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0],[0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0],[0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1],[0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0],[0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1],[0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0],[1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],[0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0],[0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1],[0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0],[1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],[0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0],[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1],[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0],[0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0],[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1]]
+start = [29,18]
+destination = [14,22]
+print sol.findShortestWay(maze, start, destination)

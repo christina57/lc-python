@@ -41,7 +41,7 @@ class Solution(object):
         :rtype: int
         """
         
-        jump = [[0] * 10] * 10 #[[0 for j in range(10)] for i in range(10)]
+        jump = [[0]* 10 for _ in range(10)]
         jump[1][3] = jump[3][1] = 2
         jump[1][7] = jump[7][1] = 4
         jump[3][9] = jump[9][3] = 6

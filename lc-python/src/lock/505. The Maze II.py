@@ -47,8 +47,6 @@ The given maze does not contain border (like the red rectangle in the example pi
 The maze contains at least 2 empty spaces, and both the width and height of the maze won't exceed 100.
 """
 
-import sys
-
 class Solution(object):
     def shortestDistance(self, maze, start, destination):
         """
@@ -61,60 +59,39 @@ class Solution(object):
         if row == 0:
             return False
         col = len(maze[0])
-        
-        # -3 : not reachable, -2 : visited, -1 : default, >=0 distances
-        dist = [[-1] * col for _ in range(row)]
-        dist[start[0]][start[1]] = -2
-        self.dfs(maze, start, destination, dist)
-        return dist[start[0]][start[1]]
-        
-    def dfs(self, maze, start, destination, dist):
-        print start, dist
-        
-        res = sys.maxsize
-        exist = False
-        for dire in range(4):
-            ret = self.move(maze, start, dire)
-            dest = ret[0]
-            steps = ret[1]
-            if dest == destination:
-                dist[start[0]][start[1]] = steps
-                return
-            if dest == start or dist[dest[0]][dest[1]] == -2:
-                continue
-            if dist[dest[0]][dest[1]] == -1:
-                dist[dest[0]][dest[1]] == -2
-                self.dfs(maze, dest, destination, dist)
-            if dist[dest[0]][dest[1]] >= 0:
-                exist = True
-                res = min(res, steps + dist[dest[0]][dest[1]])
-                
-        if exist:
-            dist[start[0]][start[1]] = res
+
+        Q = collections.deque()
+        Q.append(start)
+
+        dire = ((0, 1), (0, -1), (1, 0), (-1, 0))
+        dist = [[sys.maxsize] * col for _ in range(row)]
+        dist[start[0]][start[1]] = 0
+
+        while Q:
+            size = len(Q)
+            for i in range(size):
+                cur = Q.popleft()
+                for d in dire:
+                    (end, steps) = self.move(maze, cur, d)
+                    if (dist[cur[0]][cur[1]] + steps) < dist[end[0]][end[1]]:
+                        dist[end[0]][end[1]] = dist[cur[0]][cur[1]] + steps
+                        Q.append(end)
+
+        if dist[destination[0]][destination[1]] < sys.maxsize:
+            return dist[destination[0]][destination[1]]
         else:
-            dist[start[0]][start[1]] = -3
-        
-        
-    # 0 up 1 down 2 left 3 right        
-    def move(self, maze, start, direction):
-        dires = [[-1,0],[1,0],[0,-1],[0,1]]
-        
-        #pass by reference
+            return -1
+
+    def move(self, maze, start, dires):
+        # pass by reference
         cur = []
         cur.append(start[0])
         cur.append(start[1])
         steps = -1
-        
-        while (0 <= cur[0] < len(maze)) and (0<= cur[1] < len(maze[0])) and maze[cur[0]][cur[1]] != 1:
-            cur[0] += dires[direction][0]
-            cur[1] += dires[direction][1]
+
+        while (0 <= cur[0] < len(maze)) and (0 <= cur[1] < len(maze[0])) and maze[cur[0]][cur[1]] != 1:
+            cur[0] += dires[0]
+            cur[1] += dires[1]
             steps += 1
-            
-        return [[cur[0] - dires[direction][0], cur[1] - dires[direction][1]], steps]
 
-
-sol = Solution()
-maze = [[0,0,1,0,0],[0,0,0,0,0],[0,0,0,1,0],[1,1,0,1,1],[0,0,0,0,0]]
-start = [0,4]
-destination = [4,4]
-print sol.shortestDistance(maze, start, destination)
+        return ((cur[0] - dires[0], cur[1] - dires[1]), steps)

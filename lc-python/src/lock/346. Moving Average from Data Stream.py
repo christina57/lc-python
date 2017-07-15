@@ -18,14 +18,23 @@ class MovingAverage(object):
         Initialize your data structure here.
         :type size: int
         """
-        
+        self.window = [0,0,0]
+        self.cnt = 0
+        self.idx = 0
+        self.total = 0
 
     def next(self, val):
         """
         :type val: int
         :rtype: float
         """
+        self.total += (val - self.window[self.idx])
+        self.window[self.idx] = val
+        self.idx += 1
+        if self.cnt < 3:
+            self.cnt += 1
         
+        return self.total/self.cnt
 
 
 # Your MovingAverage object will be instantiated and called as such:

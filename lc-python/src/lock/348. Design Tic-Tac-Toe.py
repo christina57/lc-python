@@ -57,7 +57,12 @@ class TicTacToe(object):
         Initialize your data structure here.
         :type n: int
         """
-        
+        # 0 None, 1 player1, 2 player2
+        self.n = n
+        self.rows = [0] * n
+        self.cols = [0] * n
+        self.diag = 0
+        self.antidiag = 0
 
     def move(self, row, col, player):
         """
@@ -74,9 +79,23 @@ class TicTacToe(object):
         :type player: int
         :rtype: int
         """
+        val = 1 if player == 1 else -1
         
-
-
+        self.rows[row] += val
+        self.cols[col] += val
+        
+        if row == col:
+            self.diag += val
+        if row + col == self.n -1:
+            self.antidiag += val
+        
+        total = val * self.n
+        if self.rows[row] == total or self.cols[col] == total or (row == col and self.diag == total) or (row + col == self.n - 1 and self.antidiag == total):
+            return (1 if val == 1 else 2)
+        
+        return 0
+        
+       
 # Your TicTacToe object will be instantiated and called as such:
 # obj = TicTacToe(n)
 # param_1 = obj.move(row,col,player)

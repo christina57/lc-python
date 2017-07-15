@@ -43,4 +43,13 @@ class Solution(object):
         :type nestedList: List[NestedInteger]
         :rtype: int
         """
-        
+        return self.helper(nestedList, 1)
+    
+    def helper(self, nestedList, depth):
+        res = 0
+        for i in nestedList:
+            if i.isInteger():
+                res += i.getInteger() * depth
+            else:
+                res += self.helper(i.getList(), depth + 1)
+        return res
